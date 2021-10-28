@@ -2,7 +2,8 @@ require 'oystercard'
 
 describe Oystercard do
   let(:oystercard) { Oystercard.new }
-  let(:station){ double 'station' }
+  #let(:station){ double 'station' }
+  let(:station) { double('station', :name => 'Camden', :zone => 2)}
 
   it 'initialises with a balance of 0' do
     expect(subject.balance).to eq 0
@@ -34,32 +35,32 @@ describe Oystercard do
     describe '#touch_in' do
       it 'changes in_use to true' do
         subject.top_up(10)
-        expect { subject.touch_in(station) }.to change { subject.entry_station }.from(nil).to(station)
+        expect { subject.touch_in(station, 2) }.to change { subject.entry_station }.from(nil).to(station)
       end
       it 'doesn\'t allow user to touch in when balance is less than 1 pound' do
-        expect { subject.touch_in(station) }.to raise_error 'Please top up'
+        expect { subject.touch_in(station, 2) }.to raise_error 'Please top up'
       end
       it 'takes a station argument and changes entry_station to it' do
         subject.top_up(10)
-        expect { subject.touch_in(station) }.to change { subject.entry_station }.to station
+        expect { subject.touch_in(station, 2) }.to change { subject.entry_station }.to station
       end
     end
 
     describe '#touch_out' do
       before { subject.top_up(10) }
-      before { subject.touch_in(station) }
+      before { subject.touch_in(station, 2) }
       it 'changes entry_station to nil' do
-        expect { subject.touch_out(station) }.to change { subject.entry_station }.from(station).to(nil)
+        expect { subject.touch_out(station, 2) }.to change { subject.entry_station }.from(station).to(nil)
       end
       it 'deducts fare from balance' do
-        expect { subject.touch_out(station) }.to change { subject.balance }.by(-1)
+        expect { subject.touch_out(station, 2) }.to change { subject.balance }.by(-1)
       end
     end
 
     describe '#in_journey?' do
       it 'returns true if touched in' do
         subject.top_up(10)
-        subject.touch_in(station)
+        subject.touch_in(station, 2)
         expect(subject).to be_in_journey
       end
     end
@@ -70,10 +71,10 @@ describe Oystercard do
 
     it 'creates one journey when touching in and out' do
       subject.top_up(10)
-      subject.touch_in(station)
-      subject.touch_out(station)
-      subject.touch_in(station)
-      subject.touch_out(station)
+      subject.touch_in(station, 2)
+      subject.touch_out(station, 2)
+      subject.touch_in(station, 2)
+      subject.touch_out(station, 2)
       expect(subject.all_journeys.length).to eq 2
     end
 end
